@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Sorteo de Amigo Secreto</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #f5f7fb;
+      margin: 0; padding: 0;
+      display: flex; justify-content: center; align-items: flex-start;
+      min-height: 100vh;
+    }
+    .card {
+      margin-top: 40px;
+      background: #ffffff;
+      padding: 24px 28px;
+      border-radius: 16px;
+      box-shadow: 0 12px 30px rgba(0,0,0,0.08);
+      max-width: 420px; width: 100%;
+    }
+    h1{ text-align:center; font-size:1.6rem; margin-bottom:8px; }
+    .subtitle{ text-align:center; font-size:.9rem; color:#555; margin-bottom:18px; }
+    label{ font-size:.95rem; font-weight:500; margin-bottom:6px; display:block; }
+    input[type="text"]{
+      width:100%; padding:10px 12px; border-radius:10px;
+      border:1px solid #d0d5dd; font-size:.95rem; outline:none; box-sizing:border-box;
+    }
+    input[type="text"]:focus{
+      border-color:#4f46e5;
+      box-shadow:0 0 0 1px rgba(79,70,229,.15);
+    }
+    button{
+      margin-top:14px; width:100%; padding:10px 14px; border-radius:999px;
+      border:none; font-size:1rem; font-weight:600; cursor:pointer;
+      background:linear-gradient(135deg,#4f46e5,#6366f1); color:#fff;
+    }
+    button:active{ transform:scale(.98); }
+    .resultado{
+      margin-top:18px; padding:12px 14px; border-radius:12px; font-size:.95rem;
+    }
+    .ok{ background:#ecfdf3; border:1px solid #16a34a33; color:#166534; }
+    .error{ background:#fef2f2; border:1px solid #ef444433; color:#991b1b; }
+    .info{ margin-top:8px; font-size:.8rem; color:#6b7280; text-align:center; }
+    .lista{ margin-top:18px; font-size:.8rem; color:#6b7280; }
+    .lista span{
+      display:inline-block; background:#f3f4ff; padding:3px 8px;
+      border-radius:999px; margin:2px 4px 4px 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>🎁 Sorteo de Amigo Secreto</h1>
+    <p class="subtitle">Escribe tu nombre exactamente como aparece en la lista.</p>
+
+    <div class="lista" id="listaParticipantes"></div>
+
+    <label for="nombre">Tu nombre:</label>
+    <input type="text" id="nombre" placeholder="Ej. Juan Hidalgo" autocomplete="off" />
+    <button id="btnVer">Ver quién te tocó</button>
+
+    <div id="mensaje" class="resultado" style="display:none;"></div>
+
+    <p class="info">
+      ⚠️ Cada persona debe ver solo su resultado.<br>
+      No recargues la página durante el sorteo.
+    </p>
+  </div>
+
+  <script>
+    const participantes = [
+      "Katy",
+      "Jhonny",
+      "Cynthia",
+      "Jefferson",
+      "Nelson",
+      "Juan Hidalgo",
+      "David Arévalo",
+      "Juan Guamangallo",
+      "David Arellano",
+      "Mónica",
+      "Diego",
+      "Fredy",
+      "Yuquilema",
+      "Fernando",
+      "Erick",
+      "Estefanía",
+      "Homero"
+    ];
+
+    const listaDiv = document.getElementById("listaParticipantes");
+    listaDiv.innerHTML =
+      "<strong>Participantes:</strong><br>" +
+      participantes.map((p) => `<span>${p}</span>`).join(" ");
+
+    function crearAsignaciones(lista) {
+      let receptores;
+      let n = lista.length;
+      do {
+        receptores = [...lista];
+        for (let i = n - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [receptores[i], receptores[j]] = [receptores[j], receptores[i]];
+        }
+      } while (lista.some((nombre,i) => nombre === receptores[i]) && n > 1);
+
+      const mapa = {};
+      lista.forEach((nombre, i) => {
+        mapa[nombre.toLowerCase().trim()] = receptores[i];
+      });
+      return mapa;
+    }
+
+    const asignaciones = crearAsignaciones(participantes);
+
+    const inputNombre = document.getElementById("nombre");
+    const btnVer = document.getElementById("btnVer");
+    const mensajeDiv = document.getElementById("mensaje");
+
+    btnVer.addEventListener("click", () => {
+      const nombreIngresado = inputNombre.value.trim().toLowerCase();
+
+      if (!nombreIngresado) {
+        mensajeDiv.textContent = "Por favor, escribe tu nombre.";
+        mensajeDiv.className = "resultado error";
+        mensajeDiv.style.display = "block";
+        return;
+      }
+
+      if (!asignaciones[nombreIngresado]) {
+        mensajeDiv.innerHTML =
+          "Ese nombre no está en la lista de participantes.<br>" +
+          "Revisa que lo escribiste igual.";
+        mensajeDiv.className = "resultado error";
+        mensajeDiv.style.display = "block";
+        return;
+      }
+
+      const amigo = asignaciones[nombreIngresado];
+      mensajeDiv.innerHTML = `🎉 <strong>¡Te tocó: ${amigo}!</strong>`;
+      mensajeDiv.className = "resultado ok";
+      mensajeDiv.style.display = "block";
+    });
+  </script>
+</body>
+</html>
